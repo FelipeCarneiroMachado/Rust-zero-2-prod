@@ -28,4 +28,4 @@ databases:
     name: newsletter
     num_nodes: 1
     size: db-s-dev-database
-    version: "18"
+    version: "17"
