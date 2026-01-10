@@ -1,5 +1,5 @@
 # Some setup
-FROM lukemathwalker/cargo-chef:latest-rust-1.9 as chef
+FROM lukemathwalker/cargo-chef:latest-rust-1.92.0 as chef
 WORKDIR /app
 RUN rustup target add x86_64-unknown-linux-musl
 RUN apt update && apt install musl-tools lld clang -y
