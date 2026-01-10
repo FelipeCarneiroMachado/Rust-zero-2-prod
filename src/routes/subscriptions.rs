@@ -1,13 +1,10 @@
 use actix_web::web::Form;
-use actix_web::{web, HttpResponse};
-use chrono::Utc;
-use sqlx::types::chrono;
+use actix_web::{HttpResponse, web};
 use sqlx::PgPool;
+use sqlx::types::chrono::Utc;
 use uuid::Uuid;
 
-
-#[derive(serde::Deserialize)]
-#[derive(Debug)]
+#[derive(serde::Deserialize, Debug)]
 pub struct RegisterData {
     email: String,
     name: String,
@@ -20,10 +17,16 @@ pub struct RegisterData {
         subscriber_name = %form.name
     )
 )]
-pub async fn subscribe_user(form: Form<RegisterData>, connection: web::Data<PgPool>) -> HttpResponse {
+pub async fn subscribe_user(
+    form: Form<RegisterData>,
+    connection: web::Data<PgPool>,
+) -> HttpResponse {
     let request_id = Uuid::new_v4();
 
-    tracing::info!("Request_id[{request_id}] - Saving new subscriber to database: {:?}", form);
+    tracing::info!(
+        "Request_id[{request_id}] - Saving new subscriber to database: {:?}",
+        form
+    );
     match sqlx::query!(
         r#"
     INSERT INTO subscriptions (id, email, name, subscribed_at)
@@ -34,14 +37,18 @@ pub async fn subscribe_user(form: Form<RegisterData>, connection: web::Data<PgPo
         form.name,
         Utc::now(),
     )
-        .execute(connection.get_ref())
-        .await {
+    .execute(connection.get_ref())
+    .await
+    {
         Ok(_) => {
             tracing::info!("Request_id[{request_id}] - Subscriber info registered successfully");
             HttpResponse::Ok().finish()
-        },
+        }
         Err(e) => {
-            tracing::error!("Request_id[{request_id}] - Failed to execute query: {:?}", e);
+            tracing::error!(
+                "Request_id[{request_id}] - Failed to execute query: {:?}",
+                e
+            );
             HttpResponse::InternalServerError().finish()
         }
     }

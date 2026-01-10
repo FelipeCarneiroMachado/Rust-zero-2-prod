@@ -6,23 +6,18 @@ use zero2prod::telemetry::{get_subscriber, init_subscriber};
 
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
-
     // Logging setup
     let subscriber = get_subscriber("zero2prod".into(), "info".into(), std::io::stdout);
     init_subscriber(subscriber);
-
 
     // Socket and db setup
     let config = get_configuration().expect("Failed to read configuration");
 
     let address = format!("127.0.0.1:{}", &config.application_port);
 
-    let listener = TcpListener::bind(address)
-        .expect("Failed to bind random port");
+    let listener = TcpListener::bind(address).expect("Failed to bind random port");
 
-    let connection = PgPool::connect(
-        &config.database.connection_string()
-    )
+    let connection = PgPool::connect(&config.database.connection_string())
         .await
         .expect("Failed to connect to database");
 
