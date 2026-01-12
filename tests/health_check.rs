@@ -1,5 +1,6 @@
 use reqwest;
 use secrecy::SecretBox;
+use sqlx::postgres::PgPoolOptions;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use std::net::TcpListener;
 use std::sync::LazyLock;
@@ -32,9 +33,10 @@ async fn get_maintenance_db(config: &DatabaseSettings) -> PgConnection {
         password: SecretBox::new(Box::new("password".to_string())),
         port: config.port.clone(),
         host: config.host.clone(),
+        require_ssl: false,
     };
 
-    PgConnection::connect(&maintenance_settings.connection_string())
+    PgConnection::connect_with(&maintenance_settings.connection_options())
         .await
         .expect("failed to connect to maintenance database")
 }
@@ -47,7 +49,8 @@ async fn setup_db(config: &DatabaseSettings) -> PgPool {
         .await
         .expect("Failed to create database");
 
-    let pool = PgPool::connect(&config.connection_string())
+    let pool = PgPoolOptions::new()
+        .connect_with(config.connection_options())
         .await
         .expect("Failed to connect to Postgres");
     sqlx::migrate!("./migrations")
