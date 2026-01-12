@@ -26,6 +26,8 @@ WORKDIR /app
 # Install with apk since we're using alpine
 RUN apk add --no-cache libgcc openssl ca-certificates
 COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/zero2prod zero2prod
+RUN mkdir /app/src/templates
+COPY --from=builder /app/src/templates/* /app/src/templates/
 COPY configuration configuration
 ENV APP_ENVIRONMENT production
 ENTRYPOINT ["./zero2prod"]

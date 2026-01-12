@@ -5,6 +5,7 @@
 # They must specify lowercased.
 # `fra` stands for Frankfurt (Germany - EU)
 name: zero2prod
+region: nyc3
 # Check https://www.digitalocean.com/docs/app-platform/#regional-availability
 services:
   - name: zero2prod
@@ -38,9 +39,9 @@ services:
     instance_size_slug: basic-xxs
     routes:
       - path: /
-databases:
-  - engine: PG
-    name: newsletter
-    num_nodes: 1
-    size: db-s-dev-database
-    version: "17"
+#databases:
+#  - engine: PG
+#    name: newsletter
+#    num_nodes: 1
+#    size: b-s-1vcpu-1gb
+#    version: "17"
