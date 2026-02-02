@@ -39,9 +39,15 @@ services:
     instance_size_slug: basic-xxs
     routes:
       - path: /
-#databases:
-#  - engine: PG
-#    name: newsletter
+databases:
+  - name: newsletter
+    engine: PG
+    cluster_name: db-postgresql-nyc1-70948
+    production: true
+    db_user: newsletter
+    db_name: newsletter
 #    num_nodes: 1
 #    size: b-s-1vcpu-1gb
+#    db_name: newsletter
+#    db_user: newsletter
 #    version: "17"

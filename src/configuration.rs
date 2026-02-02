@@ -1,21 +1,49 @@
+use crate::domain::SubscriberEmail;
 use secrecy::{ExposeSecret, SecretBox};
 use serde_aux::field_attributes::deserialize_number_from_string;
 use sqlx::postgres::{PgConnectOptions, PgSslMode};
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Debug, Clone)]
 pub struct Settings {
     pub database: DatabaseSettings,
     pub application: ApplicationSettings,
+    pub email_client: EmailClientSettings,
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Debug)]
+pub struct EmailClientSettings {
+    pub base_url: String,
+    pub sender_email: String,
+    pub auth_token: SecretBox<String>,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub timeout_ms: u64,
+}
+
+impl Clone for EmailClientSettings {
+    fn clone(&self) -> Self {
+        Self {
+            base_url: self.base_url.clone(),
+            sender_email: self.sender_email.clone(),
+            auth_token: SecretBox::new(Box::new(self.auth_token.expose_secret().clone())),
+            timeout_ms: self.timeout_ms,
+        }
+    }
+}
+
+impl EmailClientSettings {
+    pub fn sender(&self) -> Result<SubscriberEmail, String> {
+        SubscriberEmail::parse(self.sender_email.clone())
+    }
+}
+
+#[derive(serde::Deserialize, Debug, Clone)]
 pub struct ApplicationSettings {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub port: u16,
     pub host: String,
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Debug)]
 pub struct DatabaseSettings {
     pub username: String,
     pub password: SecretBox<String>,
@@ -24,6 +52,19 @@ pub struct DatabaseSettings {
     pub host: String,
     pub database_name: String,
     pub require_ssl: bool,
+}
+
+impl Clone for DatabaseSettings {
+    fn clone(&self) -> Self {
+        Self {
+            username: self.username.clone(),
+            password: SecretBox::new(Box::new(self.password.expose_secret().clone())),
+            port: self.port,
+            host: self.host.clone(),
+            database_name: self.database_name.clone(),
+            require_ssl: self.require_ssl,
+        }
+    }
 }
 
 impl DatabaseSettings {
@@ -40,6 +81,7 @@ impl DatabaseSettings {
             .username(&self.username)
             .password(self.password.expose_secret())
             .database(&self.database_name)
+            .ssl_mode(ssl_mode)
     }
 }
 

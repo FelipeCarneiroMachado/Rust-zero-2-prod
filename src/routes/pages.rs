@@ -1,7 +1,7 @@
-use actix_web::{HttpRequest, HttpResponse, Responder};
+use actix_web::Responder;
 use actix_web::web::Html;
 
-pub async fn index(req: HttpRequest) -> impl Responder {
+pub async fn index() -> impl Responder {
     for file in std::fs::read_dir(".").unwrap() {
         println!("{:?}", file);
     }
